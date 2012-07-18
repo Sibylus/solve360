@@ -12,7 +12,7 @@ begin
     gem.files =  FileList["[A-Z]*", "{lib,spec}/**/*"]
     gem.add_dependency("configify", ">=0.0.1")
     gem.add_dependency("activesupport")  
-    gem.add_dependency("httparty", ">=0.4.5")
+    gem.add_dependency("httmultiparty")
   end
 rescue LoadError
   puts "Jeweler not available. Install it with: gem install jeweler"

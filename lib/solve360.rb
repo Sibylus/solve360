@@ -1,4 +1,4 @@
-require "httparty"
+require "httmultiparty"
 require "configify"
 require "active_support/inflector"
 require "active_support/core_ext/hash"

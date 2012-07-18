@@ -3,7 +3,7 @@ module Solve360
     
     def self.included(model)
       model.extend ClassMethods
-      model.send(:include, HTTParty)
+      model.send(:include, HTTMultiParty)
       model.instance_variable_set(:@field_mapping, {})
     end
     
@@ -12,7 +12,7 @@ module Solve360
     
     # Base item collections
     attr_accessor :fields, :related_items, :related_items_to_add, :categories, :categories_to_add,
-                    :activities, :activities_to_add
+                    :activities
     
     def initialize(attributes = {})
       puts "\n\nIn initialize:\n#{attributes.inspect}\n\n"
@@ -23,6 +23,7 @@ module Solve360
       self.related_items_to_add = []
       self.categories = []
       self.categories_to_add = []
+      self.activities = []
       
       #[:fields, :related_items].each do |collection|
       #  self.send("#{collection}=", attributes[collection]) if attributes[collection]
@@ -111,8 +112,28 @@ module Solve360
       xml
     end
     
-    def add_related_item(item)
-      related_items_to_add << item
+    def add_activity( type, fields = {} )
+      post = {}
+      post["parent"] = fields.delete(:parent) || id.to_s
+      post["file"] = fields.delete(:file) if fields[:file]
+      fields.each{ |key, val| post["data[#{key}]"] = val }
+
+      uri = "#{HTTParty.normalize_base_uri(Config.config.url)}/#{self.class.resource_name}/#{type}"
+
+      response = self.class.post(uri, :query => post, :basic_auth => self.class.auth_credentials)
+
+      if response["response"]["errors"]
+        message = response["response"]["errors"].map {|k,v| "#{k}: #{v}" }.join("\n")
+        raise Solve360::SaveFailure, message
+      else
+        act = {}
+        act["id"] = response["response"]["id"]
+        act["parent"] = post["parent"]
+        act["fields"] = fields
+
+        activities << act
+        act
+      end
     end
     
     module ClassMethods
@@ -203,7 +224,7 @@ module Solve360
         send(verb, HTTParty.normalize_base_uri(Solve360::Config.config.url) + uri,
             :headers => {"Content-Type" => "application/xml", "Accepts" => "application/json"},
             :body => body,
-            :basic_auth => {:username => Solve360::Config.config.username, :password => Solve360::Config.config.token})
+            :basic_auth => auth_credentials)
       end
       
       def construct_record_from_singular(response)
@@ -263,6 +284,10 @@ module Solve360
       
       def field_mapping
         @field_mapping
+      end
+
+      def auth_credentials
+        {:username => Solve360::Config.config.username, :password => Solve360::Config.config.token}
       end
     end
   end
