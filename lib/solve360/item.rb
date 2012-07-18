@@ -15,7 +15,7 @@ module Solve360
                     :activities
     
     def initialize(attributes = {})
-      puts "\n\nIn initialize:\n#{attributes.inspect}\n\n"
+      #puts "\n\nIn initialize:\n#{attributes.inspect}\n\n"
       attributes.symbolize_keys!
       
       self.fields = {}
@@ -204,14 +204,14 @@ module Solve360
       # @param [Integer] id of the record on the CRM
       def find_one(id)
         response = request(:get, "/#{resource_name}/#{id}")
-        puts response
+        #puts response
         construct_record_from_singular(response)
       end
       
       # Find all records
       def find_all
         response = request(:get, "/#{resource_name}/", "<request><layout>1</layout></request>")
-        puts response
+        #puts response
         construct_record_from_collection(response)
       end
       
@@ -243,7 +243,7 @@ module Solve360
 
         item[:activities] = response["activities"].collect{|i| i[1]} if response["activities"]
 
-        puts "\n\nIn construct_record_from_singular:\n#{item.inspect}\n\n"
+        #puts "\n\nIn construct_record_from_singular:\n#{item.inspect}\n\n"
 
         record = new(item)
         #
