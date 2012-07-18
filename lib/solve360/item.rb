@@ -11,19 +11,21 @@ module Solve360
     attr_accessor :id, :name, :typeid, :created, :updated, :viewed, :ownership, :flagged
     
     # Base item collections
-    attr_accessor :fields, :related_items, :related_items_to_add
+    attr_accessor :fields, :related_items, :related_items_to_add, :categories, :categories_to_add,
+                    :activities, :activities_to_add
     
     def initialize(attributes = {})
+      puts "\n\nIn initialize:\n#{attributes.inspect}\n\n"
       attributes.symbolize_keys!
       
       self.fields = {}
       self.related_items = []
       self.related_items_to_add = []
       
-      [:fields, :related_items].each do |collection|
-        self.send("#{collection}=", attributes[collection]) if attributes[collection]
-        attributes.delete collection
-      end
+      #[:fields, :related_items].each do |collection|
+      #  self.send("#{collection}=", attributes[collection]) if attributes[collection]
+      #  attributes.delete collection
+      #end
 
       attributes.each do |key, value|
         self.send("#{key}=", value)
@@ -163,12 +165,14 @@ module Solve360
       # @param [Integer] id of the record on the CRM
       def find_one(id)
         response = request(:get, "/#{resource_name}/#{id}")
+        puts response
         construct_record_from_singular(response)
       end
       
       # Find all records
       def find_all
         response = request(:get, "/#{resource_name}/", "<request><layout>1</layout></request>")
+        puts response
         construct_record_from_collection(response)
       end
       
@@ -185,22 +189,34 @@ module Solve360
       end
       
       def construct_record_from_singular(response)
-        item = response["response"]["item"]
+        response = response["response"]
+
+        item = response["item"]
         item.symbolize_keys!
-        
+
         item[:fields] = map_api_fields(item[:fields])
-      
+
+        related_items= response["relateditems"]["relatedto"] if response["relateditems"]
+        item[:related_items] = related_items.is_a?(Array) ? related_items : [related_items]
+
+        categories = response["categories"]["category"] if response["categories"]
+        item[:categories] = categories.is_a?(Array) ? categories : [categories]
+
+        item[:activities] = response["activities"].collect{|i| i[1]} if response["activities"]
+
+        puts "\n\nIn construct_record_from_singular:\n#{item.inspect}\n\n"
+
         record = new(item)
-        
-        if response["response"]["relateditems"]
-          related_items = response["response"]["relateditems"]["relatedto"]
-        
-          if related_items.kind_of?(Array)
-            record.related_items.concat(related_items)
-          else
-            record.related_items = [related_items]
-          end
-        end
+        #
+        #if response["response"]["relateditems"]
+        #  related_items = response["response"]["relateditems"]["relatedto"]
+        #
+        #  if related_items.kind_of?(Array)
+        #    record.related_items.concat(related_items)
+        #  else
+        #    record.related_items = [related_items]
+        #  end
+        #end
         
         record
       end
