@@ -21,6 +21,8 @@ module Solve360
       self.fields = {}
       self.related_items = []
       self.related_items_to_add = []
+      self.categories = []
+      self.categories_to_add = []
       
       #[:fields, :related_items].each do |collection|
       #  self.send("#{collection}=", attributes[collection]) if attributes[collection]
@@ -64,6 +66,10 @@ module Solve360
         raise Solve360::SaveFailure, message
       else
         related_items.concat(related_items_to_add)
+        self.related_items_to_add = []
+
+        categories.concat(categories_to_add)
+        self.categories_to_add = []
 
         response
       end
@@ -87,6 +93,16 @@ module Solve360
         end
         
         xml << "</relateditems>"
+      end
+
+      if categories_to_add.size > 0
+        xml << "<categories>"
+
+        categories_to_add.each do |category|
+          xml << %Q{<add><category>#{category["id"]}</category></add>}
+        end
+
+        xml << "</categories>"
       end
       
       xml << "<ownership>#{ownership}</ownership>"
@@ -134,7 +150,9 @@ module Solve360
         mapped_fields = {}
 
         field_mapping.each do |human, api|
-          mapped_fields[human] = fields[api] if !fields[api].blank?
+          if fields[api].present? && fields[api]["__content__"].present?
+            mapped_fields[human] = fields[api]["__content__"]
+          end
         end
         
         mapped_fields
