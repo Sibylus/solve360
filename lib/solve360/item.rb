@@ -198,6 +198,18 @@ module Solve360
           find_one(id)
         end
       end
+
+      def search(search_by, value)
+        find_all( filtermode: search_by, filtervalue: value )
+      end
+
+      def find_by_phone( phone )
+        search(:byphone, phone)
+      end
+
+      def find_by_email( email )
+        search(:byemail, email)
+      end
       
       # Find a single record
       # 
@@ -209,8 +221,9 @@ module Solve360
       end
       
       # Find all records
-      def find_all
-        response = request(:get, "/#{resource_name}/", "<request><layout>1</layout></request>")
+      def find_all( params = {} )
+        params[:layout] = 1
+        response = request(:get, "/#{resource_name}/", "", params)
         #puts response
         construct_record_from_collection(response)
       end
@@ -220,10 +233,11 @@ module Solve360
       # @param [Symbol, String] :get, :post, :put or :delete
       # @param [String] url of the resource 
       # @param [String, nil] optional string to send in request body
-      def request(verb, uri, body = "")
+      def request(verb, uri, body = "", query = nil)
         send(verb, HTTParty.normalize_base_uri(Solve360::Config.config.url) + uri,
             :headers => {"Content-Type" => "application/xml", "Accepts" => "application/json"},
             :body => body,
+            :query => query,
             :basic_auth => auth_credentials)
       end
       
