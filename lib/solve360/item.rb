@@ -87,23 +87,23 @@ module Solve360
       xml << map_human_fields.collect {|key, value| "<#{key}>#{CGI.escapeHTML(value.to_s)}</#{key}>"}.join("")
       
       if related_items_to_add.size > 0
-        xml << "<relateditems>"
-        
+        xml << "<relateditems><add>"
+
         related_items_to_add.each do |related_item|
-          xml << %Q{<add><relatedto><id>#{related_item["id"]}</id></relatedto></add>}
+          xml << %Q{<relatedto><id>#{related_item["id"]}</id></relatedto>}
         end
-        
-        xml << "</relateditems>"
+
+        xml << "</add></relateditems>"
       end
 
       if categories_to_add.size > 0
-        xml << "<categories>"
+        xml << "<categories><add>"
 
         categories_to_add.each do |category|
-          xml << %Q{<add><category>#{category["id"]}</category></add>}
+          xml << %Q{<category>#{category["id"]}</category>}
         end
 
-        xml << "</categories>"
+        xml << "</add></categories>"
       end
       
       xml << "<ownership>#{ownership}</ownership>"
