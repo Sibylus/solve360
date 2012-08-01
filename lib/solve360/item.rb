@@ -135,6 +135,25 @@ module Solve360
         act
       end
     end
+
+    def delete_activity( activity_id )
+      # For now it the Solve360 API doesn't care if the activity type in the delete URL
+      # matches the actual type of the activity we are deleting so hard coding to :task.
+      type = :task
+
+      uri = "#{HTTParty.normalize_base_uri(Config.config.url)}" +
+                "/#{self.class.resource_name}/#{type}/#{activity_id}"
+
+      response = self.class.delete(uri, :basic_auth => self.class.auth_credentials)
+
+      if response["response"]["errors"]
+        message = response["response"]["errors"].map {|k,v| "#{k}: #{v}" }.join("\n")
+        raise Solve360::SaveFailure, message
+      else
+        act_idx = activities.index{|act| act["id"] == activity_id}
+        activities.delete_at( act_idx ) if act_idx
+      end
+    end
     
     module ClassMethods
     
