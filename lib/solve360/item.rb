@@ -131,7 +131,9 @@ module Solve360
         act["parent"] = post["parent"]
         act["fields"] = fields
 
-        activities << act
+        # Prepend activity to beginning of list to match what we would get if
+        # we reloaded the item from the server.
+        activities = activities.unshift(act)
         act
       end
     end
