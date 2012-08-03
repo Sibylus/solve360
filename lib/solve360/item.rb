@@ -156,6 +156,10 @@ module Solve360
         activities.delete_at( act_idx ) if act_idx
       end
     end
+
+    def add_note( note )
+      add_activity(:note, details: note )
+    end
     
     module ClassMethods
     
