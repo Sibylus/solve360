@@ -37,9 +37,9 @@ module Solve360
 
     def attributes
       {
-          id: id,
+          item_id: id,
           name: name,
-          type_id: typeid,
+          item_type_id: typeid,
           created_at: created,
           updated_at: updated,
           viewed_at: viewed,
