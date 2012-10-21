@@ -47,7 +47,7 @@ module Solve360
           flagged:        flagged,
           fields:         fields,
           related_items:  related_items,
-          categories:     categories,
+          categories:     categories.collect{ |cat| category_attributes(cat) },
           activities:     activities.collect{ |act| activity_attributes(act) }
       }
     end
@@ -67,6 +67,10 @@ module Solve360
           viewed_at:        act["viewed"],
           fields:           act["fields"]
       }
+    end
+
+    def category_attributes( cat )
+      {category_id: cat["id"], name: cat["name"]}
     end
     
     # @see Base::map_human_attributes
