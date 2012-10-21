@@ -31,8 +31,25 @@ module Solve360
       #end
 
       attributes.each do |key, value|
-        self.send("#{key}=", value)
+        self.send(:"#{key}=", value) if methods.include?(:"#{key}=")
       end
+    end
+
+    def attributes
+      {
+          id: id,
+          name: name,
+          type_id: typeid,
+          created_at: created,
+          updated_at: updated,
+          viewed_at: viewed,
+          owner_id: ownership,
+          flagged: flagged,
+          fields: fields,
+          related_items: related_items,
+          categories: categories,
+          activities: activities
+      }
     end
     
     # @see Base::map_human_attributes
@@ -197,7 +214,14 @@ module Solve360
 
         field_mapping.each do |human, api|
           if fields[api].present? && fields[api]["__content__"].present?
-            mapped_fields[human] = fields[api]["__content__"]
+            mapped_fields[human] = fields.delete(api)["__content__"]
+          end
+        end
+
+        fields.each do |api_name, field|
+          if field && field["label"].present?
+            mapped_fields[ field["label"] ] = field["__content__"]
+            fields.delete(api_name)
           end
         end
         
@@ -303,12 +327,8 @@ module Solve360
         response["response"].collect do |item|  
           item = item[1]
           if item.respond_to?(:keys)
-            attributes = {}
-            attributes[:id] = item["id"]
-          
-            attributes[:fields] = map_api_fields(item)
-
-            record = new(attributes)
+            item[:fields] = map_api_fields(item)
+            new item
           end
         end.compact
       end
