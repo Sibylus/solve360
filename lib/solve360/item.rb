@@ -37,18 +37,35 @@ module Solve360
 
     def attributes
       {
-          item_id: id,
-          name: name,
-          item_type_id: typeid,
-          created_at: created,
-          updated_at: updated,
-          viewed_at: viewed,
-          owner_id: ownership,
-          flagged: flagged,
-          fields: fields,
-          related_items: related_items,
-          categories: categories,
-          activities: activities
+          item_id:        id,
+          name:           name,
+          item_type_id:   typeid,
+          created_at:     created,
+          updated_at:     updated,
+          viewed_at:      viewed,
+          owner_id:       ownership,
+          flagged:        flagged,
+          fields:         fields,
+          related_items:  related_items,
+          categories:     categories,
+          activities:     activities.collect{ |act| activity_attributes(act) }
+      }
+    end
+
+    def activity_attributes( act )
+      {
+          activity_id:      act["id"],
+          activity_type_id: act["typeid"],
+          name:             act["name"],
+          creator_id:       act["creatorid"],
+          parent_id:        act["parent"],
+          flagged:          !!act["flagged"],
+          level:            act["level"],
+          position:         act["position"],
+          created_at:       act["created"],
+          updated_at:       act["updated"],
+          viewed_at:        act["viewed"],
+          fields:           act["fields"]
       }
     end
     
