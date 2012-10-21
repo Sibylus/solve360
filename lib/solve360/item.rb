@@ -323,7 +323,7 @@ module Solve360
         item[:related_items] = related_items.is_a?(Array) ? related_items : [related_items]
 
         categories = response["categories"]["category"] if response["categories"]
-        item[:categories] = categories.is_a?(Array) ? categories : [categories]
+        item[:categories] = [categories].flatten.compact
 
         item[:activities] = response["activities"].collect{|i| i[1]} if response["activities"]
 
