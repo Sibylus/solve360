@@ -320,7 +320,7 @@ module Solve360
         item[:fields] = map_api_fields(item[:fields])
 
         related_items= response["relateditems"]["relatedto"] if response["relateditems"]
-        item[:related_items] = related_items.is_a?(Array) ? related_items : [related_items]
+        item[:related_items] = [related_items].flatten.compact
 
         categories = response["categories"]["category"] if response["categories"]
         item[:categories] = [categories].flatten.compact
