@@ -353,6 +353,12 @@ module Solve360
           end
         end.compact
       end
+
+      def construct_record_from_webhook(post_body)
+        data = HTTParty::Parser.new(post_body, :xml).parse
+        simulated_response = {"response" => data["notification"]["content"]}
+        construct_record_from_singular(simulated_response)
+      end
       
       def resource_name
         self.name.to_s.demodulize.underscore.pluralize
